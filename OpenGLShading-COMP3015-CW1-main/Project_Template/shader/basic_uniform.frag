@@ -67,7 +67,6 @@ float Cutoff;
 	{
 
 	 vec3 h = normalize(v + s);
-
 	 //calculate specular
 	 spec = Material.Ks * pow( max( dot(h,normal), 0.0 ), Material.Shininess);
 
@@ -76,38 +75,31 @@ float Cutoff;
 	 return ambient + Lights.L * (diffuse + spec);
  }
  //spotlight blinn model
- vec3 blinnPhongSpotModel(vec3 position, vec3 n)
+ vec3 blinnPhongSpotModel(vec3 pos, vec3 n)
  {
     vec3 texColour = texture(Tex1, TexCoord).rgb;
 
+
 	vec3 ambient = Spot.La * Material.Ka * texColour;
-	
 	vec3 s = normalize(Spot.L - position);
 
 	float cosAng = dot(-s, normalize(Spot.Direction));
-
 	float angle = acos(cosAng);
 
 	float spotScale = 0.0f;
-
 	vec3 spec = vec3(0.0f);
-	
 	vec3 diffuse = vec3(0.0f);
 
 	if(angle < Spot.Cutoff)
 	{
 	   spotScale = pow(cosAng, Spot.Exponent);
-
 	   float sDotN = max(dot(s,n), 0.0);
-
 	   diffuse = Spot.L * Material.Kd * sDotN;
 
 	   if(sDotN > 0.0)
 	   {
 	      vec3 v = normalize(-position.xyz);
-
 		  vec3 h = normalize(v + s);
-
 		  spec = Material.Ks * pow(max(dot(h,n), 0.0), Material.Shininess);
 
 	   }
@@ -126,6 +118,7 @@ void main()
 
 	//passing into the phong model
 	vec3 phongColour = blinnPhongModel(position, normalize(normal));
+	//vec3 phongSpotColour = blinnPhongSpotModel(position, normalize(normal));
 
 	//combining our fog colour and blinnphong
 	vec3 colour = mix(Fog.Colour, phongColour, fogFactor);

@@ -1,6 +1,8 @@
 #include "scenebasic_uniform.h"
 #include "helper/texture.h"
-
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
 
 #include <iostream>
 #include <sstream>
@@ -29,6 +31,11 @@ void SceneBasic_Uniform::initScene()
     compile();
     glEnable(GL_DEPTH_TEST);
 
+  
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
     //view and projection
     view = glm::lookAt(vec3(0.5f, 0.75f, 0.75f), vec3(0.0f, 0.0f, 0.0f),vec3(0.0f, 1.0f, 0.0f));
     projection = mat4(1.0f);
@@ -39,14 +46,17 @@ void SceneBasic_Uniform::initScene()
     vec3 lightpos = vec3(0.0f, 1.0f, 1.0f);
 
     //setting the lights
+    //prog.setUniform("Spot.L", vec3(0.5f));
+    //prog.setUniform("Spot.La", vec3(0.5f));
+    //prog.setUniform("Spot.Exponent", 10.0f);
+    //prog.setUniform("Spot.Cutoff", glm::radians(20.0f));
+
     prog.setUniform("Lights.La", 0.5f, 0.5f, 0.5f);
     prog.setUniform("Lights.L", 0.8f, 0.5f, 0.1f);
     prog.setUniform("Lights.Position", lightpos);
 
     sofaTex = Texture::loadTexture("sofa_D.png");
 
-
-    
     //binding the texture to our binding0
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, sofaTex);
@@ -140,4 +150,13 @@ void SceneBasic_Uniform::resize(int w, int h)
     height = h;
     projection = glm::perspective(glm::radians(70.0f), (float)w / h, 0.3f, 100.0f);
 }
+void SceneBasic_Uniform::ImGuiSetup()
+{
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    ImGui::StyleColorsDark();
+    //ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init();
 
+}

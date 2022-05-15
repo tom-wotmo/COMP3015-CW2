@@ -25,6 +25,7 @@ private:
     float rotation;
     void setMatrices();
     void compile();
+    void ImGuiSetup();
     
 
 public:
