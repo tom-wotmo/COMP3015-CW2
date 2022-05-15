@@ -7,6 +7,7 @@
 #include "helper/glslprogram.h"
 
 #include "helper/objmesh.h"
+#include "helper/skybox.h"
 
 class SceneBasic_Uniform : public Scene
 {
@@ -14,18 +15,21 @@ private:
   
     GLuint vaoHandle;
     GLSLProgram prog;
+    GLSLProgram skyboxProg;
   
      
     std::unique_ptr<ObjMesh> catMesh;
     std::unique_ptr<ObjMesh> sofaMesh;
     std::unique_ptr<ObjMesh> tableMesh;
     
+    SkyBox Sky;
 
     float angle;
     float rotation;
     void setMatrices();
     void compile();
     void ImGuiSetup();
+    void SkyBoxSetup();
     
 
 public:

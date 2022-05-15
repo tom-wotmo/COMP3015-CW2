@@ -13,9 +13,11 @@ using std::endl;
 
 #include "helper/glutils.h"
 
+
 using glm::vec3;
 using glm::mat4;
 GLuint sofaTex;
+GLuint skyBoxNightTex;
 
 SceneBasic_Uniform::SceneBasic_Uniform() : rotation(0.0f)
 {
@@ -24,6 +26,7 @@ SceneBasic_Uniform::SceneBasic_Uniform() : rotation(0.0f)
     sofaMesh = ObjMesh::load("sofa.obj", true);
     tableMesh = ObjMesh::load("table.obj", true);
    
+
 }
 
 void SceneBasic_Uniform::initScene()
@@ -56,8 +59,11 @@ void SceneBasic_Uniform::initScene()
     prog.setUniform("Lights.Position", lightpos);
 
     sofaTex = Texture::loadTexture("sofa_D.png");
+    skyBoxNightTex = Texture::loadCubeMap("skyBoxNightTex.png");
 
-    //binding the texture to our binding0
+    SkyBoxSetup();
+
+    //binding the texture to our binding
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, sofaTex);
 }
@@ -68,7 +74,10 @@ void SceneBasic_Uniform::compile()
 		prog.compileShader("basic_uniform.vert");
 		prog.compileShader("basic_uniform.frag");
 		prog.link();
-		prog.use();
+
+        skyboxProg.compileShader("skybox.vert", GLSLShader::VERTEX);
+        skyboxProg.compileShader("skybox.frag", GLSLShader::FRAGMENT);
+        skyboxProg.link();
 
 	} catch (GLSLProgramException &e) {
 		cerr << e.what() << endl;
@@ -150,6 +159,7 @@ void SceneBasic_Uniform::resize(int w, int h)
     height = h;
     projection = glm::perspective(glm::radians(70.0f), (float)w / h, 0.3f, 100.0f);
 }
+
 void SceneBasic_Uniform::ImGuiSetup()
 {
     IMGUI_CHECKVERSION();
@@ -158,5 +168,20 @@ void SceneBasic_Uniform::ImGuiSetup()
     ImGui::StyleColorsDark();
     //ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init();
+
+}
+void SceneBasic_Uniform::SkyBoxSetup()
+{
+    skyboxProg.use();
+
+    model = mat4(1.0f);
+    mat4 mv = view * model;
+    skyboxProg.setUniform("MVP", projection * mv);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, skyBoxNightTex);
+
+    Sky.render();
+
 
 }
