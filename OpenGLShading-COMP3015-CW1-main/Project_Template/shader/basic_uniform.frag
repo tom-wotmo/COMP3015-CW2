@@ -8,6 +8,7 @@ in vec3 position;
 in vec3 normal;
 in vec2 TexCoord;
 in vec3 Vec;
+
 //Light structure
 uniform struct LightInfo 
 {
@@ -41,6 +42,8 @@ vec3 Direction;
 float Exponent;
 float Cutoff;
 }Spot;
+
+uniform int shaderInt;
 //blinnphong model
  vec3 blinnPhongModel(vec3 pos, vec3 n)
 {
@@ -115,13 +118,26 @@ void main()
 	float fogFactor = (Fog.MaxDist - dist) / (Fog.MaxDist - Fog.MinDist);
 
 	fogFactor = clamp(fogFactor,0.0,1.0);
-
+	
+	if(shaderInt == 2)
+	{
+		vec3 phongColour = blinnPhongModel(position, normalize(normal));
+		vec3 colour = mix(Fog.Colour, phongColour, fogFactor);
+		FragColor = vec4(colour, 1.0);
+	}
+	if(shaderInt == 1)
+	{
+	    vec3 phongColour = blinnPhongSpotModel(position, normalize(normal));
+		vec3 colour = mix(Fog.Colour, phongColour, fogFactor);
+		FragColor = vec4(colour, 1.0);
+	
+	}
 	//passing into the phong model
-	vec3 phongColour = blinnPhongModel(position, normalize(normal));
+
 	//vec3 phongSpotColour = blinnPhongSpotModel(position, normalize(normal));
 
 	//combining our fog colour and blinnphong
-	vec3 colour = mix(Fog.Colour, phongColour, fogFactor);
 
-	FragColor = vec4(colour, 1.0);
+
+	
 }

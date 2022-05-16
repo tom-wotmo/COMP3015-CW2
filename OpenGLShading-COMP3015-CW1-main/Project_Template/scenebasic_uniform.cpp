@@ -19,6 +19,9 @@ using glm::mat4;
 GLuint sofaTex, catTex, tableTex;
 GLuint skyBoxNightTex;
 
+//ability to control shaders from an interface
+int shaderInt = 1;
+
 SceneBasic_Uniform::SceneBasic_Uniform() : rotation(0.0f)
 {
     //loading in our models
@@ -49,20 +52,31 @@ void SceneBasic_Uniform::initScene()
     vec3 lightpos = vec3(0.0f, 1.0f, 1.0f);
 
     //setting the lights
-    //prog.setUniform("Spot.L", vec3(0.5f));
-    //prog.setUniform("Spot.La", vec3(0.5f));
-    //prog.setUniform("Spot.Exponent", 10.0f);
-    //prog.setUniform("Spot.Cutoff", glm::radians(20.0f));
+    if (shaderInt == 1) 
+    {
+        prog.setUniform("shaderInt", 1);
+        prog.setUniform("Spot.L", vec3(2.5f));
+        prog.setUniform("Spot.La", vec3(2.5f));
+        prog.setUniform("Spot.Exponent", 15.0f);
+        prog.setUniform("Spot.Cutoff", glm::radians(20.0f));
+       
+    }
+    if (shaderInt == 2) 
+    {
+        prog.setUniform("shaderInt", 2);
+        prog.setUniform("Lights.La", 0.1f, 0.1f, 0.1f);
+        prog.setUniform("Lights.L", 1.0f, 1.0f, 1.0f);
+        prog.setUniform("Lights.Position", lightpos);
+    }
+  
 
-    prog.setUniform("Lights.La", 0.5f, 0.5f, 0.5f);
-    prog.setUniform("Lights.L", 0.8f, 0.5f, 0.1f);
-    prog.setUniform("Lights.Position", lightpos);
+
 
     sofaTex = Texture::loadTexture("sofa_D.png");
     catTex = Texture::loadTexture("catTex.jpg");
     tableTex = Texture::loadTexture("tableTex.jpg");
  
-
+   // SkyBoxSetup();
 
     //binding the texture to our binding
     glActiveTexture(GL_TEXTURE0);
@@ -80,6 +94,12 @@ void SceneBasic_Uniform::compile()
 		prog.compileShader("shader/basic_uniform.frag");
 		prog.link();
         prog.use();
+
+        skyboxProg.compileShader("shader/skybox.vert", GLSLShader::VERTEX);
+        skyboxProg.compileShader("shader/skybox.frag", GLSLShader::FRAGMENT);
+        skyboxProg.link();
+        //skyboxProg.compileShader("shader/skybox.vert");
+       
 
 	} catch (GLSLProgramException &e) {
 		cerr << e.what() << endl;
