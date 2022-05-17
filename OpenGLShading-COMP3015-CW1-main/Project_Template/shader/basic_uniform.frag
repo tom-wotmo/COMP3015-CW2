@@ -137,7 +137,5 @@ void main()
 	//vec3 phongSpotColour = blinnPhongSpotModel(position, normalize(normal));
 
 	//combining our fog colour and blinnphong
-
-
 	
 }

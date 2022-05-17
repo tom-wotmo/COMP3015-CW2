@@ -16,18 +16,21 @@ using std::endl;
 
 using glm::vec3;
 using glm::mat4;
-GLuint sofaTex, catTex, tableTex;
+GLuint sofaTex, catTex, tableTex, treeTex;
 GLuint skyBoxNightTex;
 
 //ability to control shaders from an interface
 int shaderInt = 1;
+int modelInt = 2;
 
-SceneBasic_Uniform::SceneBasic_Uniform() : rotation(0.0f)
+SceneBasic_Uniform::SceneBasic_Uniform() : rotation(0.0f), Sky(100.0f)
 {
     //loading in our models
     catMesh = ObjMesh::load("cat.obj", true);
     sofaMesh = ObjMesh::load("sofa.obj", true);
     tableMesh = ObjMesh::load("table.obj", true);
+    treeMesh = ObjMesh::load("treeModel.obj", true);
+    
    
 
 }
@@ -36,11 +39,6 @@ void SceneBasic_Uniform::initScene()
 {
     compile();
     glEnable(GL_DEPTH_TEST);
-
-  
-    //ImGui_ImplOpenGL3_NewFrame();
-    //ImGui_ImplGlfw_NewFrame();
-    //ImGui::NewFrame();
 
     //view and projection
     view = glm::lookAt(vec3(0.5f, 0.75f, 0.75f), vec3(0.0f, 0.0f, 0.0f),vec3(0.0f, 1.0f, 0.0f));
@@ -51,30 +49,34 @@ void SceneBasic_Uniform::initScene()
     projection = mat4(1.0f);
     vec3 lightpos = vec3(0.0f, 1.0f, 1.0f);
 
-    //setting the lights
+   
+    //blinn phong spotlight
     if (shaderInt == 1) 
     {
+        prog.use();
         prog.setUniform("shaderInt", 1);
         prog.setUniform("Spot.L", vec3(2.5f));
         prog.setUniform("Spot.La", vec3(2.5f));
         prog.setUniform("Spot.Exponent", 15.0f);
         prog.setUniform("Spot.Cutoff", glm::radians(20.0f));
-       
+        
     }
+    //blinnphong
     if (shaderInt == 2) 
     {
+        prog.use();
         prog.setUniform("shaderInt", 2);
-        prog.setUniform("Lights.La", 0.1f, 0.1f, 0.1f);
-        prog.setUniform("Lights.L", 1.0f, 1.0f, 1.0f);
+        prog.setUniform("Lights.La", vec3(0.5f));
+        prog.setUniform("Lights.L", vec3(0.5f));
         prog.setUniform("Lights.Position", lightpos);
+       
     }
   
-
-
-
     sofaTex = Texture::loadTexture("sofa_D.png");
     catTex = Texture::loadTexture("catTex.jpg");
     tableTex = Texture::loadTexture("tableTex.jpg");
+    treeTex = Texture::loadTexture("treeModel.png");
+    skyBoxNightTex = Texture::loadCubeMap("skyBoxNightTex.png");
  
    // SkyBoxSetup();
 
@@ -85,20 +87,21 @@ void SceneBasic_Uniform::initScene()
     glBindTexture(GL_TEXTURE_2D, catTex);
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D, tableTex);
+    glActiveTexture(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_2D, treeTex);
 }
 
 void SceneBasic_Uniform::compile()
 {
 	try {
+
 		prog.compileShader("shader/basic_uniform.vert");
 		prog.compileShader("shader/basic_uniform.frag");
 		prog.link();
-        prog.use();
-
-        skyboxProg.compileShader("shader/skybox.vert", GLSLShader::VERTEX);
-        skyboxProg.compileShader("shader/skybox.frag", GLSLShader::FRAGMENT);
+        
+        skyboxProg.compileShader("shader/skybox.frag");
+        skyboxProg.compileShader("shader/skybox.vert");
         skyboxProg.link();
-        //skyboxProg.compileShader("shader/skybox.vert");
        
 
 	} catch (GLSLProgramException &e) {
@@ -115,7 +118,7 @@ void SceneBasic_Uniform::update( float t )
 
 }
 
-void SceneBasic_Uniform::setMatrices()
+void SceneBasic_Uniform::setMatrices(GLSLProgram& prog)
 {
     mat4 mv = view * model;
     prog.setUniform("ModelViewMatrix", mv); //set the uniform for the model view matrix
@@ -128,44 +131,70 @@ void SceneBasic_Uniform::render()
     view = glm::lookAt(vec3(10.0f, 5.0f, 4.15f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 2.0f, 0.0f));
     view = glm::rotate(view, glm::radians(30.0f * rotation), vec3(0.0f, 1.0f, 0.0f));
 
+    glEnable(GL_DEPTH_TEST);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    //skybox
+    //skyboxProg.use();
+    //model = mat4(1.0f);
+    //setMatrices(skyboxProg);
+    //Sky.render();
+
     //load the fog
     prog.setUniform("Fog.MaxDist", 60.0f);
     prog.setUniform("Fog.MinDist", 1.0f);
     prog.setUniform("Fog.Colour", vec3(1.0f,1.0f,1.0f));
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
     //render the cat
-    prog.setUniform("Material.Kd", 0.2f, 0.2f, 0.2f);
+    /*prog.setUniform("Material.Kd", 0.2f, 0.2f, 0.2f);
     prog.setUniform("Material.Ks", 0.9f, 0.9f, 0.9f);
     prog.setUniform("Material.Ka", 0.5f, 0.5f, 0.5f);
     prog.setUniform("Material.Shininess", 1.0f);
-   
     model = mat4(1.0f);
     model = glm::rotate(model, glm::radians(90.0f), vec3(0.0f, 10.0f, 0.0f));
     model = glm::scale(model, vec3(0.005f, 0.005f, 0.005f));
     model = glm::translate(model, vec3(10.0f, -0.02f, 10.0f));
 
     prog.setUniform("Tex1", 1);
-    setMatrices();
-    catMesh->render();
+    setMatrices(prog);
+    catMesh->render();*/
+
+    if (modelInt == 1) 
+    {
+        prog.setUniform("Material.Kd", 0.4f, 0.4f, 0.4f);
+        prog.setUniform("Material.Ks", 0.9f, 0.9f, 0.9f);
+        prog.setUniform("Material.Ka", 0.5f, 0.5f, 0.5f);
+        prog.setUniform("Material.Shininess", 1.0f);
+        model = mat4(1.0f);
+        model = glm::rotate(model, glm::radians(180.0f), vec3(0.0f, 1.0f, 0.0f));
+        model = glm::scale(model, vec3(0.45f, 0.45f, 0.45f));
+        model = glm::translate(model, vec3(0.0f, -0.45f, 0.0f));
+
+        prog.setUniform("Tex1", 3);
+        setMatrices(prog);
+        treeMesh->render();
+    }
 
     //render the sofa
-    prog.setUniform("Material.Kd", 0.4f, 0.4f, 0.4f);
-    prog.setUniform("Material.Ks", 0.9f, 0.9f, 0.9f);
-    prog.setUniform("Material.Ka", 0.5f, 0.5f, 0.5f);
-    prog.setUniform("Material.Shininess", 1.0f);
-    model = mat4(1.0f);
-    model = glm::rotate(model, glm::radians(180.0f), vec3(0.0f, 1.0f, 0.0f));
-    model = glm::scale(model, vec3(0.05f, 0.05f, 0.05f));
-    model = glm::translate(model, vec3(0.0f, -0.45f, 0.0f));
+    if (modelInt == 2)
+    {
+        prog.setUniform("Material.Kd", 0.4f, 0.4f, 0.4f);
+        prog.setUniform("Material.Ks", 0.9f, 0.9f, 0.9f);
+        prog.setUniform("Material.Ka", 0.5f, 0.5f, 0.5f);
+        prog.setUniform("Material.Shininess", 1.0f);
+        model = mat4(1.0f);
+        model = glm::rotate(model, glm::radians(180.0f), vec3(0.0f, 1.0f, 0.0f));
+        model = glm::scale(model, vec3(0.05f, 0.05f, 0.05f));
+        model = glm::translate(model, vec3(0.0f, -0.45f, 0.0f));
 
-    prog.setUniform("Tex1", 0);
-    setMatrices();
-    sofaMesh->render();
+        prog.setUniform("Tex1", 0);
+        setMatrices(prog);
+        sofaMesh->render();
+    }
 
+  
     //render the table
-    prog.setUniform("Material.Kd", 0.4f, 0.4f, 0.4f);
+ /*   prog.setUniform("Material.Kd", 0.4f, 0.4f, 0.4f);
     prog.setUniform("Material.Ks", 0.9f, 0.9f, 0.9f);
     prog.setUniform("Material.Ka", 0.5f, 0.5f, 0.5f);
     prog.setUniform("Material.Shininess", 1.0f);
@@ -173,9 +202,10 @@ void SceneBasic_Uniform::render()
     model = glm::rotate(model, glm::radians(-90.0f), vec3(0.0f, 1.0f, 0.0f));
     model = glm::scale(model, vec3(7.5f,7.5f,7.5f));
     model = glm::translate(model, vec3(-1.5f, 0.0f, 0.0f));
+
     prog.setUniform("Tex1", 2);
-    setMatrices();
-    tableMesh->render();
+    setMatrices(prog);
+    tableMesh->render();*/
    
 }
 
@@ -205,7 +235,7 @@ void SceneBasic_Uniform::SkyBoxSetup()
     mat4 mv = view * model;
     skyboxProg.setUniform("MVP", projection * mv);
 
-    skyBoxNightTex = Texture::loadHdrCubeMap("skyBoxNightTex.png");
+    
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, skyBoxNightTex);
 

@@ -21,12 +21,13 @@ private:
     std::unique_ptr<ObjMesh> catMesh;
     std::unique_ptr<ObjMesh> sofaMesh;
     std::unique_ptr<ObjMesh> tableMesh;
+    std::unique_ptr<ObjMesh> treeMesh;
     
     SkyBox Sky;
 
     float angle;
     float rotation;
-    void setMatrices();
+    void setMatrices(GLSLProgram& prog);
     void compile();
     void ImGuiSetup();
     void SkyBoxSetup();
