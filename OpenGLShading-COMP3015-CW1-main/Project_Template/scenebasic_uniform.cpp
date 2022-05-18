@@ -15,6 +15,7 @@ using std::endl;
 
 
 using glm::vec3;
+using glm::vec4;
 using glm::mat4;
 GLuint sofaTex, catTex, tableTex, treeTex;
 GLuint skyBoxNightTex, skyBoxDayTex;
@@ -24,7 +25,7 @@ GLuint skyBoxNightTex, skyBoxDayTex;
 //blinnphong = 2
 //treemodel = 1
 //sofamodel = 2
-int shaderInt = 1;
+int shaderInt = 2;
 int modelInt = 1;
 int SkyBoxInt = 0;
 
@@ -35,7 +36,7 @@ SceneBasic_Uniform::SceneBasic_Uniform() : rotation(0.0f), Sky(500.0f)
     treeMesh = ObjMesh::load("treeModel.obj", true);
     sofaTex = Texture::loadTexture("sofa_D.png");
     treeTex = Texture::loadTexture("treeModel.png");
-    skyBoxNightTex = Texture::loadCubeMap("media/pisa/pisa");
+
 }
 
 void SceneBasic_Uniform::initScene()
@@ -51,6 +52,12 @@ void SceneBasic_Uniform::initScene()
     model = mat4(1.0f);
     projection = mat4(1.0f);
     vec3 lightpos = vec3(0.0f, 1.0f, 1.0f);
+
+    GLuint skyBoxTex = Texture::loadHdrCubeMap("media/pisa/pisa");
+
+    //activate and bindtexture
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, skyBoxTex);
 
    
     //blinn phong spotlight
@@ -74,6 +81,44 @@ void SceneBasic_Uniform::initScene()
         prog.setUniform("Lights.Position", lightpos);
        
     }
+    if (shaderInt == 3)
+    {
+
+        glEnable(GL_DEPTH_TEST);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        view = glm::lookAt(vec3(0.0f, 0.0f, 4.5f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 2.0f, 0.0f));
+        view = glm::rotate(view, glm::radians(30.0f * rotation), vec3(0.0f, 1.0f, 0.0f));
+
+        edgeProg.setUniform("Pass", 1);
+        edgeProg.setUniform("EdgeThreshold", 0.05f);
+        edgeProg.setUniform("Light.Position", vec4(0.0f, 0.0f, 0.0f, 1.0f));
+        edgeProg.setUniform("Light.La", vec3(0.5f));
+        edgeProg.setUniform("Light.L", vec3(0.5f));
+
+        if (modelInt == 1)
+        {
+
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, treeTex);
+
+            edgeProg.setUniform("Material.Kd", 0.4f, 0.4f, 0.4f);
+            edgeProg.setUniform("Material.Ks", 0.9f, 0.9f, 0.9f);
+            edgeProg.setUniform("Material.Ka", 0.5f, 0.5f, 0.5f);
+            edgeProg.setUniform("Material.Shininess", 1.0f);
+            model = mat4(1.0f);
+            model = glm::rotate(model, glm::radians(180.0f), vec3(0.0f, 1.0f, 0.0f));
+            model = glm::scale(model, vec3(0.45f, 0.45f, 0.45f));
+            model = glm::translate(model, vec3(0.0f, -0.45f, 0.0f));
+
+            edgeProg.setUniform("Tex1", 0);
+            setMatrices(edgeProg);
+            treeMesh->render();
+
+        }
+
+
+    }
 
 
 }
@@ -86,9 +131,13 @@ void SceneBasic_Uniform::compile()
 		prog.compileShader("shader/basic_uniform.frag");
 		prog.link();
         
-        skyboxProg.compileShader("shader/skybox.frag");
         skyboxProg.compileShader("shader/skybox.vert");
+        skyboxProg.compileShader("shader/skybox.frag");
         skyboxProg.link();
+
+        edgeProg.compileShader("shader/edgedetection.vert");
+        edgeProg.compileShader("shader/edgedetection.frag");
+        edgeProg.link();
        
 
 	} catch (GLSLProgramException &e) {
@@ -141,14 +190,6 @@ void SceneBasic_Uniform::render()
         prog.setUniform("Tex1", 0);
         setMatrices(prog);
         treeMesh->render();
-        if (SkyBoxInt == 1) 
-        {
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_CUBE_MAP, skyBoxNightTex);
-            skyboxProg.setUniform("SkyBoxTex", 0);
-
-        }
-
 
     }
 
@@ -198,7 +239,6 @@ void SceneBasic_Uniform::ImGuiSetup()
 }
 void SceneBasic_Uniform::SkyBoxSetup()
 {
-
     skyboxProg.use();
     model = mat4(1.0f);
     setMatrices(skyboxProg);

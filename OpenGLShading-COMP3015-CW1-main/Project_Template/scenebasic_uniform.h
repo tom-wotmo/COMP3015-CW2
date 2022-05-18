@@ -16,6 +16,7 @@ private:
     GLuint vaoHandle;
     GLSLProgram prog;
     GLSLProgram skyboxProg;
+    GLSLProgram edgeProg;
   
      
     std::unique_ptr<ObjMesh> catMesh;
