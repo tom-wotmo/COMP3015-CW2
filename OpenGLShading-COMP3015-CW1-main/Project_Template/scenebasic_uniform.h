@@ -8,6 +8,7 @@
 
 #include "helper/objmesh.h"
 #include "helper/skybox.h"
+#include "helper/plane.h"
 
 class SceneBasic_Uniform : public Scene
 {
@@ -17,7 +18,8 @@ private:
     GLSLProgram prog;
     GLSLProgram skyboxProg;
     GLSLProgram edgeProg;
-  
+    GLSLProgram silhouetteProg;
+    GLSLProgram waterShader;
      
     std::unique_ptr<ObjMesh> catMesh;
     std::unique_ptr<ObjMesh> sofaMesh;
@@ -25,9 +27,11 @@ private:
     std::unique_ptr<ObjMesh> treeMesh;
     
     SkyBox Sky;
+    Plane plane;
 
     float angle;
     float rotation;
+    float time;
  
     void compile();
     void ImGuiSetup();

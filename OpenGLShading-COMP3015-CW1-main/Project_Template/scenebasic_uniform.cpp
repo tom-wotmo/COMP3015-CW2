@@ -26,11 +26,12 @@ GLuint skyBoxNightTex, skyBoxDayTex;
 //blinnphong = 2
 //treemodel = 1
 //sofamodel = 2
-int shaderInt = 3;
-int modelInt = 2;
+int shaderInt = 4;
+int modelInt = 1;
 int SkyBoxInt = 0;
+bool rotationBool = true;
 
-SceneBasic_Uniform::SceneBasic_Uniform() : rotation(0.0f)
+SceneBasic_Uniform::SceneBasic_Uniform() : rotation(0.0f), plane(13.0f, 10.0f, 200,2), time(0)
 {
     //loading in our models
     sofaMesh = ObjMesh::load("sofa.obj", true);
@@ -43,6 +44,9 @@ SceneBasic_Uniform::SceneBasic_Uniform() : rotation(0.0f)
 void SceneBasic_Uniform::initScene()
 {
     compile();
+
+    glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+
     glEnable(GL_DEPTH_TEST);
 
     //view and projection
@@ -75,6 +79,15 @@ void SceneBasic_Uniform::compile()
         edgeProg.compileShader("shader/edgedetection.frag");
         edgeProg.link();
        
+        silhouetteProg.compileShader("shader/silhouette.vert");
+        silhouetteProg.compileShader("shader/silhouette.frag");
+        silhouetteProg.compileShader("shader/silhouette.geom");
+        silhouetteProg.link();
+
+        waterShader.compileShader("shader/waterShader.vert");
+        waterShader.compileShader("shader/waterShader.frag");
+        waterShader.compileShader("shader/waterShader.geom");
+        waterShader.link();
 
 	} catch (GLSLProgramException &e) {
 		cerr << e.what() << endl;
@@ -86,23 +99,86 @@ void SceneBasic_Uniform::update( float t )
 {
     //controlling the rotating around the model
     rotation = t;
+    time = t;
 }
 
 
 void SceneBasic_Uniform::render()
 {
     view = glm::lookAt(vec3(0.0f, 0.0f, 9.5f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 12.0f, 0.0f));
-    view = glm::rotate(view, glm::radians(30.0f * rotation), vec3(0.0f, 1.0f, 0.0f));
+    
+    if (rotationBool) 
+    {
+        view = glm::rotate(view, glm::radians(30.0f * rotation), vec3(0.0f, 1.0f, 0.0f));
+    }
+    else
+    {
+        view = glm::rotate(view, glm::radians(30.0f * 0), vec3(0.0f, 1.0f, 0.0f));
+    }
 
  
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
-    //SkyBoxSetup();
+    if (shaderInt == 4)
+    {
 
-    //load the fog
- 
-    //spotlight shader
+        glEnable(GL_DEPTH_TEST);
+
+        waterShader.use();
+
+       // waterShader.setUniform("PctExtend", 0.1f);
+
+        waterShader.setUniform("Time", time * 2);
+        waterShader.setUniform("isAnimated", true);
+
+        //waterShader.setUniform("EdgeWidth", 1.0f);
+        waterShader.setUniform("LineColour", vec3(1.0f));
+
+        waterShader.setUniform("Material.Kd", 0.2f, 0.5f, 0.9f);
+        waterShader.setUniform("Material.Ka", 0.2f, 0.5f, 0.9f);
+
+        waterShader.setUniform("Levels", 5);
+
+        waterShader.setUniform("Light.Position", vec4(1.0f));
+        waterShader.setUniform("Light.Intensity", vec3(1.0f));
+
+       
+        model = mat4(1.0f);
+        model = glm::translate(model, vec3(0.0f, -5.0f, -5.0f));
+        model = glm::scale(model, vec3(5.0f, 5.0f, 5.0f));
+        setMatrices(waterShader);
+        plane.render();
+
+    }
+   
+
+    if (shaderInt == 0)
+    {
+        glEnable(GL_DEPTH_TEST);
+        silhouetteProg.use();
+
+        silhouetteProg.setUniform("EdgeWidth", 0.015f);
+        silhouetteProg.setUniform("PctExtend", 0.25f);
+
+        silhouetteProg.setUniform("LineColour", vec4(0.05f, 0.0f, 0.05f, 1.0f));
+
+        silhouetteProg.setUniform("Material.Kd", 0.7f, 0.5f, 0.2f);
+        silhouetteProg.setUniform("Material.Ka", 0.2f, 0.2f, 0.2f);
+
+        silhouetteProg.setUniform("Light.Intensity", 1.0f, 1.0f, 1.0f);
+        silhouetteProg.setUniform("Light.Position", vec4(0.0f, 0.0f, 0.0f, 1.0f));
+
+        glFinish();
+
+        if (modelInt == 1) 
+        {
+            model = mat4(1.0f);
+            setMatrices(silhouetteProg);
+            treeMesh->render();
+
+        }
+    }
     if (shaderInt == 1)
     {
         glEnable(GL_DEPTH_TEST);

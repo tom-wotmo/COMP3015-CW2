@@ -113,6 +113,24 @@
     <None Include="shader\edgedetection.vert">
       <Filter>shaders</Filter>
     </None>
+    <None Include="shader\silhouette.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shader\silhouette.geom">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shader\silhouette.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shader\waterShader.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shader\waterShader.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shader\waterShader.geom">
+      <Filter>shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="helper\scene.h">
