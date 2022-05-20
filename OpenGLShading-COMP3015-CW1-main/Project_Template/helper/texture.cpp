@@ -47,14 +47,14 @@ GLuint Texture::loadCubeMap(const std::string &baseName, const std::string &exte
 
     // Allocate immutable storage for the whole cube map texture
     glTexStorage2D(GL_TEXTURE_CUBE_MAP, 1, GL_RGBA8, w, h);
-    glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, 0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, 0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, data);
     stbi_image_free(data);
 
     // Load the other 5 cube-map faces
     for( int i = 1; i < 6; i++ ) {
         std::string texName = baseName + "_" + suffixes[i] + extension;
         data = Texture::loadPixels(texName, w, h, false);
-        glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, 0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, 0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, data);
         stbi_image_free(data);
     }
 

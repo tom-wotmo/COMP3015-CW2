@@ -13,7 +13,7 @@ class SceneBasic_Uniform : public Scene
 {
 private:
   
-    GLuint vaoHandle;
+    GLuint vaoHandle, fsQuad, fboHandle, renderTex;
     GLSLProgram prog;
     GLSLProgram skyboxProg;
     GLSLProgram edgeProg;
@@ -28,10 +28,16 @@ private:
 
     float angle;
     float rotation;
-    void setMatrices(GLSLProgram& prog);
+ 
     void compile();
     void ImGuiSetup();
     void SkyBoxSetup();
+
+    void edgeDetectSetup();
+    void setupFBO();
+    void pass1();
+    void pass2();
+ 
     
 
 public:
@@ -41,6 +47,8 @@ public:
     void update( float t );
     void render();
     void resize(int, int);
+
+    void setMatrices(GLSLProgram& prog);
 };
 
 #endif // SCENEBASIC_UNIFORM_H
