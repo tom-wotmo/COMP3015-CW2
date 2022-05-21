@@ -1,52 +1,69 @@
 #version 460
 
-in vec3 GPosition;
-in vec3 GNormal;
-
-flat in int GIsEdge;
-
 layout (location = 0) out vec4 FragColor;
+layout (binding = 0) uniform sampler2D Tex1;
+layout (binding =1) uniform sampler2D NormalMapTex;
 
-uniform struct LightInfo {
- vec3 Intensity; // Ambient light intensity
- vec4 Position;
-} Light;
+in vec3 position;
+in vec3 normal;
+in vec2 TexCoord;
+in vec3 Vec;
 
-uniform struct MaterialInfo {
- vec3 Ka; // Ambient reflectivity
- vec3 Kd; // Diffuse reflectivity
- vec3 Ks; // Specular reflectivity
- float Shininess; // Specular shininess factor
+//Light structure
+uniform struct LightInfo 
+{
+vec4 Position;		
+vec3 La; //ambient light			
+vec3 L;	//light diffuse and spec			
+} Lights;
+
+//material information struct
+uniform struct MaterialInfo 
+{
+vec3 Ka; //material ambient				
+vec3 Kd; //material diffuse		
+vec3 Ks; //material specular			
+float Shininess; //material shininess	
 } Material;
 
-uniform vec4 LineColor;
-
-const int levels = 3;
-
-const float scaleFactor = 1.0 / levels;
-
-vec3 toonShade()
+//blinnphong model
+ vec3 blinnPhongModel(vec3 pos, vec3 n)
 {
-	vec3 s = normalize(Light.Position.xyz - GPosition.xyz);
+     
+	 //getting the colour of texture
+	 vec3 texColour = texture(Tex1, TexCoord).rgb;
 
-	vec3 ambient = Material.Ka;
+	 //ambient calculation
+	 vec3 ambient = texColour * Lights.La; 
 
-	float cosine = dot(s, GNormal);
+	 vec3 s = vec3 (0.0);
+	 s = normalize(vec3(Lights.Position) - pos);
+	 
+	 //dot product
+	 float sDotN = max( dot(s,n), 0.0 );
 
-	vec3 diffuse = Material.Kd * ceil(cosine * levels) * scaleFactor;
+	 vec3 diffuse = texColour * sDotN;
 
-	return Light.Intensity * (ambient + diffuse);
-}
+	 vec3 spec = vec3(0.0);
 
-void main()
+	 vec3 v = normalize(-position.xyz);
+
+	if( sDotN > 0.0 )
+	{
+
+	 vec3 h = normalize(v + s);
+	 //calculate specular
+	 spec = Material.Ks * pow( max( dot(h,normal), 0.0 ), Material.Shininess);
+
+	}
+
+	 return ambient + Lights.L * (diffuse + spec);
+ }
+ void main()
 {
+  
+    vec3 phongColour = blinnPhongModel(position, normalize(normal));
+
+    FragColor = vec4(phongColour, 1.0);
 	
-	if (GIsEdge == 1)
-	{
-		FragColor = LineColor;
-	}
-	else
-	{
-		FragColor = vec4(toonShade(), 1.0);
-	}
 }

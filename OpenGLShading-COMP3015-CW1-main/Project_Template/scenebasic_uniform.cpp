@@ -18,7 +18,7 @@ using glm::vec3;
 using glm::vec4;
 using glm::mat4;
 using glm::mat3;
-GLuint sofaTex, catTex, tableTex, treeTex;
+GLuint sofaTex, catTex, tableTex, treeTex, waterTex;
 GLuint skyBoxNightTex, skyBoxDayTex;
 
 //ability to control shaders from an interface
@@ -38,6 +38,7 @@ SceneBasic_Uniform::SceneBasic_Uniform() : rotation(0.0f), plane(13.0f, 10.0f, 2
     treeMesh = ObjMesh::load("treeModel.obj", true);
     sofaTex = Texture::loadTexture("sofa_D.png");
     treeTex = Texture::loadTexture("treeModel.png");
+    waterTex = Texture::loadTexture("waterTex.jpg");
 
 }
 
@@ -45,7 +46,7 @@ void SceneBasic_Uniform::initScene()
 {
     compile();
 
-    glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+    glClearColor(1.5f, 1.5f, 0.5f, 1.0f);
 
     glEnable(GL_DEPTH_TEST);
 
@@ -78,15 +79,9 @@ void SceneBasic_Uniform::compile()
         edgeProg.compileShader("shader/edgedetection.vert");
         edgeProg.compileShader("shader/edgedetection.frag");
         edgeProg.link();
-       
-        silhouetteProg.compileShader("shader/silhouette.vert");
-        silhouetteProg.compileShader("shader/silhouette.frag");
-        silhouetteProg.compileShader("shader/silhouette.geom");
-        silhouetteProg.link();
 
         waterShader.compileShader("shader/waterShader.vert");
         waterShader.compileShader("shader/waterShader.frag");
-        waterShader.compileShader("shader/waterShader.geom");
         waterShader.link();
 
 	} catch (GLSLProgramException &e) {
@@ -122,34 +117,34 @@ void SceneBasic_Uniform::render()
 
     if (shaderInt == 4)
     {
+        vec3 lightpos = vec3(0.0f, 1.0f, 1.0f);
 
         glEnable(GL_DEPTH_TEST);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, waterTex);
 
         waterShader.use();
-
-       // waterShader.setUniform("PctExtend", 0.1f);
 
         waterShader.setUniform("Time", time * 2);
         waterShader.setUniform("isAnimated", true);
 
-        //waterShader.setUniform("EdgeWidth", 1.0f);
-        waterShader.setUniform("LineColour", vec3(1.0f));
+        waterShader.setUniform("Lights.La", vec3(0.5f));
+        waterShader.setUniform("Lights.L", vec3(1.5f));
+        waterShader.setUniform("Lights.Position", vec3(lightpos));
 
-        waterShader.setUniform("Material.Kd", 0.2f, 0.5f, 0.9f);
-        waterShader.setUniform("Material.Ka", 0.2f, 0.5f, 0.9f);
+        waterShader.setUniform("Material.Kd", 0.4f, 0.4f, 0.4f);
+        waterShader.setUniform("Material.Ks", 0.9f, 0.9f, 0.9f);
+        waterShader.setUniform("Material.Ka", 0.5f, 0.5f, 0.5f);
+        waterShader.setUniform("Material.Shininess", 1.0f);
 
-        waterShader.setUniform("Levels", 5);
-
-        waterShader.setUniform("Light.Position", vec4(1.0f));
-        waterShader.setUniform("Light.Intensity", vec3(1.0f));
-
-       
         model = mat4(1.0f);
-        model = glm::translate(model, vec3(0.0f, -5.0f, -5.0f));
-        model = glm::scale(model, vec3(5.0f, 5.0f, 5.0f));
+        model = glm::rotate(model, glm::radians(180.0f), vec3(0.0f, 1.0f, 0.0f));
+        model = glm::scale(model, vec3(2.0f));
+        model = glm::translate(model, vec3(0.0f, -1.0f, 0.0f));
+
+        waterShader.setUniform("Tex1", 0);
         setMatrices(waterShader);
         plane.render();
-
     }
    
 

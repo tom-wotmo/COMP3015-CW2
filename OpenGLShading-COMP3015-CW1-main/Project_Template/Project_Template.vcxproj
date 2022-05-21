@@ -172,13 +172,9 @@
     <None Include="shader\basic_uniform.vert" />
     <None Include="shader\edgedetection.frag" />
     <None Include="shader\edgedetection.vert" />
-    <None Include="shader\silhouette.frag" />
-    <None Include="shader\silhouette.geom" />
-    <None Include="shader\silhouette.vert" />
     <None Include="shader\skybox.frag" />
     <None Include="shader\skybox.vert" />
     <None Include="shader\waterShader.frag" />
-    <None Include="shader\waterShader.geom" />
     <None Include="shader\waterShader.vert" />
   </ItemGroup>
   <ItemGroup>
