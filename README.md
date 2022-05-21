@@ -9,4 +9,4 @@ The program has a few different scenes to interact, by changing the shader Integ
 # What makes your shader program special and how does it compare to similar things? 
 This program is very simple depicting a few simple scenes to show off the shaders, 1 scene that shows off two shaders on a tree with some grass and the second scene a vertex animation shader that shows a rubber duck in a pool. I liked the idea of a small duck in a pool chilling out in the sun. The tree scene is simply a showcase of previous CW1 shader and a spotlight shader.
 
-![Alt Text](https://giphy.com/gifs/LouhvHwjFztnZo28vD)
+![Alt Text](https://media.giphy.com/media/LouhvHwjFztnZo28vD/giphy.gif)
