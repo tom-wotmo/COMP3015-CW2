@@ -17,3 +17,6 @@ SpotLight Blinn Phong Tree Scene
 
 BlinnPhong Tree Scene(CW1)
 ![Alt Text](https://media.giphy.com/media/HPcgKCxxNvgUz7Lbj0/giphy.gif)
+
+Edge Detect Tree
+![Alt Text](https://media.giphy.com/media/OCywymToRa2wbH0Op6/giphy.gif)
