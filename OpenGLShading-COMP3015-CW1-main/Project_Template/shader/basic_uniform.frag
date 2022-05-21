@@ -44,6 +44,7 @@ float Cutoff;
 }Spot;
 
 uniform int shaderInt;
+uniform bool isFoggy;
 //blinnphong model
  vec3 blinnPhongModel(vec3 pos, vec3 n)
 {
@@ -112,6 +113,9 @@ uniform int shaderInt;
 void main()
 {
   
+     if(isFoggy)
+	 {
+
     //calculating the fog
     float dist = abs(position.z);
 
@@ -132,10 +136,21 @@ void main()
 		FragColor = vec4(colour, 1.0);
 	
 	}
-	//passing into the phong model
+	}
+	else if (!isFoggy)
+	{
 
-	//vec3 phongSpotColour = blinnPhongSpotModel(position, normalize(normal));
+	if(shaderInt == 2)
+	{
+	  vec3 phongColour = blinnPhongModel(position, normalize(normal));
+	  FragColor = vec4(phongColour, 1.0);
+	}
+	if(shaderInt == 1)
+	{
+	    vec3 phongColour = blinnPhongSpotModel(position, normalize(normal));
+		FragColor = vec4(phongColour, 1.0);
+	}
 
-	//combining our fog colour and blinnphong
+	}
 	
 }

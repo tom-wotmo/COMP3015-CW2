@@ -21,10 +21,9 @@ private:
     GLSLProgram silhouetteProg;
     GLSLProgram waterShader;
      
-    std::unique_ptr<ObjMesh> catMesh;
     std::unique_ptr<ObjMesh> sofaMesh;
-    std::unique_ptr<ObjMesh> tableMesh;
     std::unique_ptr<ObjMesh> treeMesh;
+    std::unique_ptr<ObjMesh> duckMesh;
     
     SkyBox Sky;
     Plane plane;
@@ -41,6 +40,7 @@ private:
     void setupFBO();
     void pass1();
     void pass2();
+    void renderDuck();
  
     
 
