@@ -20,26 +20,19 @@ using glm::vec3;
 using glm::vec4;
 using glm::mat4;
 using glm::mat3;
-GLuint sofaTex, treeTex, waterTex, duckTex;
+GLuint treeTex, waterTex, duckTex;
 
 
-//ability to control shaders from an interface
-//spotlight = 1
-//blinnphong = 2
-//treemodel = 1
-//sofamodel = 2
+
 int shaderInt = 1;
 int modelInt = 1;
-int SkyBoxInt = 0;
 bool rotationBool = true;
 
 SceneBasic_Uniform::SceneBasic_Uniform() : rotation(0.0f), plane(13.0f, 10.0f, 200,2), time(0)
 {
     //loading in our models
-    sofaMesh = ObjMesh::load("sofa.obj", true);
     treeMesh = ObjMesh::load("treeModel.obj", true);
     duckMesh = ObjMesh::load("rubberDuck.obj", true);
-    sofaTex = Texture::loadTexture("sofa_D.png");
     treeTex = Texture::loadTexture("treeModel.png");
     waterTex = Texture::loadTexture("waterTex.jpg");
     duckTex = Texture::loadTexture("rubberDuckTex.png");
@@ -97,6 +90,8 @@ void SceneBasic_Uniform::update( float t )
 
 void SceneBasic_Uniform::render()
 {
+
+    //setting the correct view for each shader
     if (shaderInt == 3)
     {
         view = glm::lookAt(vec3(0.0f, 0.0f, 4.5f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f));
@@ -107,10 +102,11 @@ void SceneBasic_Uniform::render()
     }
     else 
 
-    view = glm::lookAt(vec3(0.0f, 0.0f, 9.5f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f));
+    //setting the view for the first 2 shaders
+    view = glm::lookAt(vec3(10.0f, 0.0f, 4.5f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 10.0f, 0.0f));
 
     
-    
+    //rotates the model if the boolean is correct
     if (rotationBool) 
     {
         view = glm::rotate(view, glm::radians(30.0f * rotation), vec3(0.0f, 1.0f, 0.0f));
@@ -123,8 +119,6 @@ void SceneBasic_Uniform::render()
  
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
-   
     if (shaderInt == 1)
     {
         glEnable(GL_DEPTH_TEST);
@@ -171,25 +165,7 @@ void SceneBasic_Uniform::render()
             prog.setUniform("Tex1", 0);
             setMatrices(prog);
             treeMesh->render();
-        }
-        if (modelInt == 2) 
-        {
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, sofaTex);
-
-            prog.setUniform("Material.Kd", 0.4f, 0.4f, 0.4f);
-            prog.setUniform("Material.Ks", 0.9f, 0.9f, 0.9f);
-            prog.setUniform("Material.Ka", 0.5f, 0.5f, 0.5f);
-            prog.setUniform("Material.Shininess", 1.0f);
-            model = mat4(1.0f);
-            model = glm::rotate(model, glm::radians(180.0f), vec3(0.0f, 1.0f, 0.0f));
-            model = glm::scale(model, vec3(0.05f, 0.05f, 0.05f));
-            model = glm::translate(model, vec3(0.0f, -0.45f, 0.0f));
-
-            prog.setUniform("Tex1", 0);
-            setMatrices(prog);
-            sofaMesh->render();
-        }
+        }  
 
     }
     if (shaderInt == 2) 
@@ -229,32 +205,13 @@ void SceneBasic_Uniform::render()
             setMatrices(prog);
             treeMesh->render();
         }
-        if (modelInt == 2) 
-        {
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, sofaTex);
 
-            prog.setUniform("Material.Kd", 0.4f, 0.4f, 0.4f);
-            prog.setUniform("Material.Ks", 0.9f, 0.9f, 0.9f);
-            prog.setUniform("Material.Ka", 0.5f, 0.5f, 0.5f);
-            prog.setUniform("Material.Shininess", 1.0f);
-            model = mat4(1.0f);
-            model = glm::rotate(model, glm::radians(180.0f), vec3(0.0f, 1.0f, 0.0f));
-            model = glm::scale(model, vec3(0.05f, 0.05f, 0.05f));
-            model = glm::translate(model, vec3(0.0f, -0.45f, 0.0f));
-
-            prog.setUniform("Tex1", 0);
-            setMatrices(prog);
-            sofaMesh->render();
-        }
     }
     if (shaderInt == 3)
     {
-  
         pass1();
         glFlush();
         pass2();
-
 
     }
 
@@ -370,6 +327,7 @@ void SceneBasic_Uniform::pass1()
     glEnable(GL_DEPTH_TEST);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    //loading our tree mesh
     view = glm::lookAt(vec3(7.0f * cos(angle), 4.0f, 7.0f * sin(angle)),
         vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
     view = glm::rotate(view, glm::radians(30.0f * rotation), vec3(0.0f, 1.0f, 0.0f));
@@ -381,7 +339,6 @@ void SceneBasic_Uniform::pass1()
     setMatrices(edgeProg);
     treeMesh->render();
 
- 
 }
 void SceneBasic_Uniform::pass2()
 {
@@ -458,23 +415,6 @@ void SceneBasic_Uniform::resize(int w, int h)
     projection = glm::perspective(glm::radians(70.0f), (float)w / h, 0.3f, 100.0f);
 }
 
-void SceneBasic_Uniform::ImGuiSetup()
-{
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
-    ImGui::StyleColorsDark();
-    //ImGui_ImplGlfw_InitForOpenGL(window, true);
-    ImGui_ImplOpenGL3_Init();
-
-}
-void SceneBasic_Uniform::SkyBoxSetup()
-{
-    skyboxProg.use();
-    model = mat4(1.0f);
-    setMatrices(skyboxProg);
-    Sky.render();
-}
 void SceneBasic_Uniform::setMatrices(GLSLProgram& progPass)
 {
     mat4 mv = view * model;

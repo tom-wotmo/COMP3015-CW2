@@ -20,8 +20,7 @@ private:
     GLSLProgram edgeProg;
     GLSLProgram silhouetteProg;
     GLSLProgram waterShader;
-     
-    std::unique_ptr<ObjMesh> sofaMesh;
+
     std::unique_ptr<ObjMesh> treeMesh;
     std::unique_ptr<ObjMesh> duckMesh;
     
@@ -33,9 +32,6 @@ private:
     float time;
  
     void compile();
-    void ImGuiSetup();
-    void SkyBoxSetup();
-
     void edgeDetectSetup();
     void setupFBO();
     void pass1();
