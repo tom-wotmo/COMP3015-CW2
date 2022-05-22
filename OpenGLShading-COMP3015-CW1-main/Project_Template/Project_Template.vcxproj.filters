@@ -119,6 +119,30 @@
     <None Include="shader\waterShader.vert">
       <Filter>shaders</Filter>
     </None>
+    <None Include="basic_uniform.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="basic_uniform.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="edgedetection.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="edgedetection.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="skybox.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="skybox.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="waterShader.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="waterShader.vert">
+      <Filter>shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="helper\scene.h">

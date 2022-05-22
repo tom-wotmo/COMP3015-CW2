@@ -24,7 +24,7 @@ GLuint treeTex, waterTex, duckTex;
 
 
 
-int shaderInt = 1;
+int shaderInt = 4;
 int modelInt = 1;
 bool rotationBool = true;
 
@@ -58,20 +58,20 @@ void SceneBasic_Uniform::compile()
 {
 	try {
 
-		prog.compileShader("shader/basic_uniform.vert");
-		prog.compileShader("shader/basic_uniform.frag");
+		prog.compileShader("basic_uniform.vert");
+		prog.compileShader("basic_uniform.frag");
 		prog.link();
         
-        skyboxProg.compileShader("shader/skybox.vert");
-        skyboxProg.compileShader("shader/skybox.frag");
+        skyboxProg.compileShader("skybox.vert");
+        skyboxProg.compileShader("skybox.frag");
         skyboxProg.link();
 
-        edgeProg.compileShader("shader/edgedetection.vert");
-        edgeProg.compileShader("shader/edgedetection.frag");
+        edgeProg.compileShader("edgedetection.vert");
+        edgeProg.compileShader("edgedetection.frag");
         edgeProg.link();
 
-        waterShader.compileShader("shader/waterShader.vert");
-        waterShader.compileShader("shader/waterShader.frag");
+        waterShader.compileShader("waterShader.vert");
+        waterShader.compileShader("waterShader.frag");
         waterShader.link();
 
 	} catch (GLSLProgramException &e) {
